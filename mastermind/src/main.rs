@@ -64,9 +64,9 @@ impl Mastermind {
         } else {
             best_guess = self.get_best_guess();
         }
-        println!("  Best guess: {:?}, {:?}, {:?}, {:?}", best_guess[0], best_guess[1], best_guess[2], best_guess[3]);
+        //println!("  Best guess: {:?}, {:?}, {:?}, {:?}", best_guess[0], best_guess[1], best_guess[2], best_guess[3]);
         let guess_result = eval_guess(self.hidden_colours.clone(),best_guess.clone());
-        println!("  Soft Matches: {}, Hard Matches: {}\n", guess_result.0, guess_result.1);
+        //println!("  Soft Matches: {}, Hard Matches: {}\n", guess_result.0, guess_result.1);
         return if guess_result.1 == 4 {
             // If we guessed the right answer
             true
@@ -116,16 +116,16 @@ impl Mastermind {
 
 fn main() {
     let mut total = 0;
-    for _i in 1..2 {
+    for _i in 0..200 {
         let mut game = Mastermind::new_game([1, 1, 2, 3]);
         let mut game_iterations = 1;
-        println!("Iteration {}:", game_iterations);
+        //println!("Iteration {}:", game_iterations);
         while game.simulate_perfect_move() == false {
             game_iterations += 1;
-            println!("Iteration {}:", game_iterations);
+            //println!("Iteration {}:", game_iterations);
         }
         total += game_iterations;
-        println!("Won the game in {} iterations!!", game_iterations)
+        //println!("Won the game in {} iterations!!", game_iterations)
     }
 
     println!("{}", &total )
