@@ -1,8 +1,11 @@
 use std::cmp;
 use rand::{seq::IteratorRandom, thread_rng};
 
+fn print_vector(vector: &Vec<u16>) {
+    println!("[{}]", vector.iter().fold(String::new(), |acc, &num| acc + &num.to_string() + ", "));
+}
 
-fn get_counts(vec: Vec<u8>,guess_counts:u8) -> Vec<u8> {
+fn get_counts(vec: Vec<u16>,guess_counts:u16) -> Vec<u16> {
     let mut counts = vec![0; guess_counts as usize];
         for v in vec {
             counts[v as usize] += 1;
@@ -10,7 +13,7 @@ fn get_counts(vec: Vec<u8>,guess_counts:u8) -> Vec<u8> {
     counts
 }
 
-fn get_combinations(num_cells:u8, num_values:u8) -> Vec<Vec<u8>> {
+fn get_combinations(num_cells:u16, num_values:u16) -> Vec<Vec<u16>> {
     let mut combinations = vec![];
     if num_cells == 1 {
         for i in 0..num_values {
@@ -31,7 +34,7 @@ fn get_combinations(num_cells:u8, num_values:u8) -> Vec<Vec<u8>> {
     combinations
 }
 
-pub fn eval_guess(compare_colours: Vec<u8>, guess_colours: Vec<u8>,num_colours:u8 ) -> (u8, u8) {
+pub fn eval_guess(compare_colours: Vec<u16>, guess_colours: Vec<u16>,num_colours:u16 ) -> (u16, u16) {
     let guess_counts = get_counts(guess_colours.clone().to_vec(),num_colours);
     let compare_counts = get_counts(compare_colours.clone().to_vec(),num_colours);
     let mut hard_count = 0;
@@ -48,15 +51,15 @@ pub fn eval_guess(compare_colours: Vec<u8>, guess_colours: Vec<u8>,num_colours:u
 }
 
 pub struct Mastermind {
-    hidden_colours: Vec<u8>,
-    all_possibilities: Vec<Vec<u8>>,
-    remaining_valid: Vec<Vec<u8>>,
-    num_colours: u8,
-    num_cells: u8
+    hidden_colours: Vec<u16>,
+    all_possibilities: Vec<Vec<u16>>,
+    remaining_valid: Vec<Vec<u16>>,
+    num_colours: u16,
+    num_cells: u16
 }
 
 impl Mastermind {
-    pub fn new_game(hidden_colours: Vec<u8>,num_colours:u8, num_cells: u8) -> Self {
+    pub fn new_game(hidden_colours: Vec<u16>,num_colours:u16, num_cells: u16) -> Self {
         let all_possibilities =  get_combinations(num_cells,num_colours);
         Mastermind {
             hidden_colours,
@@ -67,13 +70,14 @@ impl Mastermind {
         }
     }
     fn simulate_perfect_move(&mut self) -> bool {
-        let best_guess: Vec<u8>;
+        let best_guess: Vec<u16>;
         if self.remaining_valid.len() == 1 {
             best_guess = self.remaining_valid[0].clone();
         } else {
             best_guess = self.get_best_guess();
         }
-        println!("[{}]", best_guess.iter().fold(String::new(), |acc, &num| acc + &num.to_string() + ", "));
+        print_vector(&best_guess);
+
         let guess_result = eval_guess(self.hidden_colours.clone(),best_guess.clone(),self.num_colours);
         println!("  Soft Matches: {}, Hard Matches: {}\n", guess_result.0, guess_result.1);
         return if guess_result.1 == self.num_cells {
@@ -85,7 +89,7 @@ impl Mastermind {
         }
     }
 
-    fn get_best_guess(&self) -> Vec<u8> {
+    fn get_best_guess(&self) -> Vec<u16> {
         let mut best_guess = (vec![],20000000);
         for guess in self.all_possibilities.iter() {
             best_guess = self.check_with_remaining_values(guess, best_guess);
@@ -93,7 +97,7 @@ impl Mastermind {
         best_guess.0
     }
 
-    fn filter_valid_remaining(&mut self, guess: &Vec<u8>, guess_result: (u8, u8)){
+    fn filter_valid_remaining(&mut self, guess: &Vec<u16>, guess_result: (u16, u16)){
         let mut filtered_remaining = Vec::with_capacity(self.remaining_valid.len());
         for remaining in self.remaining_valid.iter() {
             let (soft_count, hard_count) = eval_guess(remaining.clone(), guess.clone(),self.num_colours);
@@ -104,7 +108,7 @@ impl Mastermind {
         self.remaining_valid = filtered_remaining;
     }
 
-    fn check_with_remaining_values(&self, guess: &Vec<u8>, best_guess: (Vec<u8>, i32)) -> (Vec<u8>, i32) {
+    fn check_with_remaining_values(&self, guess: &Vec<u16>, best_guess: (Vec<u16>, i32)) -> (Vec<u16>, i32) {
         let counter_len = (self.num_cells+1).pow(self.num_cells as u32);
         let mut counter = vec![0; counter_len as usize];
         for possibility in self.remaining_valid.iter() {
@@ -125,10 +129,13 @@ impl Mastermind {
 }
 
 fn main() {
-    let all_possibilities =  get_combinations(5,8);
+    let num_colours = 6;
+    let num_cells = 4;
+    let all_possibilities =  get_combinations(num_cells,num_colours);
     let sample = all_possibilities.iter().choose_multiple(&mut thread_rng(), 50);
     for s in sample {
-        let mut game = Mastermind::new_game(s.to_vec(),8,5);
+        print_vector(&s);
+        let mut game = Mastermind::new_game(s.to_vec(),num_colours,num_cells);
         let mut game_iterations = 1;
     
         while game.simulate_perfect_move() == false {
