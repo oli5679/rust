@@ -77,11 +77,9 @@ impl Mastermind {
             best_guess = self.get_best_guess();
         }
         print_vector(&best_guess);
-
         let guess_result = eval_guess(self.hidden_colours.clone(),best_guess.clone(),self.num_colours);
         println!("  Soft Matches: {}, Hard Matches: {}\n", guess_result.0, guess_result.1);
         return if guess_result.1 == self.num_cells {
-            // If we guessed the right answer
             true
         } else {
             self.filter_valid_remaining(&best_guess, guess_result);
